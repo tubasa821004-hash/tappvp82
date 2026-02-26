@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Idle Tap Battle Gacha</title>
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to bottom, #0f0f0f, #1a1a1a);
+  color: white;
+  text-align: center;
+  overflow-x: hidden;
+}
+h1 { margin-top: 20px; }
+
+.bar {
+  width: 80%;
+  height: 20px;
+  background: #444;
+  margin: 10px auto;
+  border-radius: 10px;
+}
+.fill {
+  height: 100%;
+  background: lime;
+  border-radius: 10px;
+}
+.enemyFill { background: red; }
+
+button {
+  margin: 8px;
+  padding: 12px 18px;
+  font-size: 14px;
+  border: none;
+  border-radius: 12px;
+  background: orange;
+  color: black;
+}
+
+.gold {
+  font-size: 18px;
+  margin-top: 10px;
+}
+
+.damage {
+  position: absolute;
+  color: yellow;
+  font-weight: bold;
+  animation: floatUp 1s ease-out forwards;
+}
+
+@keyframes floatUp {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-40px); }
+}
+
+.weapon {
+  margin-top: 10px;
+  font-size: 16px;
+}
+</style>
+</head>
+<body>
+
+<h1>⚔ Idle Tap Battle ⚔</h1>
+
+<div class="gold">💰 ゴールド: <span id="gold">0</span></div>
+<div class="weapon">🗡 武器: <span id="weapon">なし</span></div>
+
+<p>敵 HP</p>
+<div class="bar"><div id="enemyHP" class="fill enemyFill"></div></div>
+
+<p id="level">レベル: 1</p>
+
+<button onclick="attack()">👊 タップ攻撃</button>
+<button onclick="buyAuto()">🤖 自動攻撃LvUP (50G)</button>
+<button onclick="gacha()">🎰 ガチャ (100G)</button>
+
+<script>
+let enemyMax = 100;
+let enemyHP = 100;
+let level = 1;
+let gold = 0;
+let autoLevel = 0;
+let weaponPower = 0;
+let weaponName = "なし";
+
+function updateUI() {
+  document.getElementById("enemyHP").style.width = (enemyHP/enemyMax*100) + "%";
+  document.getElementById("gold").innerText = gold;
+  document.getElementById("level").innerText = "レベル: " + level;
+  document.getElementById("weapon").innerText = weaponName;
+}
+
+function showDamage(dmg) {
+  let el = document.createElement("div");
+  el.className = "damage";
+  el.innerText = "-" + dmg;
+  el.style.left = (window.innerWidth/2 + Math.random()*100 - 50) + "px";
+  el.style.top = "200px";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+function attack() {
+  let base = Math.floor(Math.random()*15)+5;
+  let damage = base + weaponPower;
+  enemyHP -= damage;
+  showDamage(damage);
+
+  if(enemyHP <= 0){
+    level++;
+    gold += 30;
+    enemyMax += 40;
+    enemyHP = enemyMax;
+  }
+  updateUI();
+}
+
+function autoAttack(){
+  if(autoLevel > 0){
+    let damage = autoLevel * 2 + weaponPower;
+    enemyHP -= damage;
+    showDamage(damage);
+
+    if(enemyHP <= 0){
+      level++;
+      gold += 30;
+      enemyMax += 40;
+      enemyHP = enemyMax;
+    }
+    updateUI();
+  }
+}
+
+function buyAuto(){
+  if(gold >= 50){
+    gold -= 50;
+    autoLevel++;
+    updateUI();
+  } else {
+    alert("ゴールド不足！");
+  }
+}
+
+function gacha(){
+  if(gold < 100){
+    alert("100G必要！");
+    return;
+  }
+
+  gold -= 100;
+  let roll = Math.random()*100;
+
+  if(roll < 5){
+    weaponName = "🌈 SSR 神剣エクスカリバー";
+    weaponPower = 50;
+    alert("SSRゲット！！");
+  } else if(roll < 25){
+    weaponName = "✨ SR ドラゴンブレード";
+    weaponPower = 25;
+    alert("SRゲット！");
+  } else {
+    weaponName = "🔹 R アイアンソード";
+    weaponPower = 10;
+    alert("Rゲット");
+  }
+
+  updateUI();
+}
+
+setInterval(autoAttack, 1000);
+updateUI();
+</script>
+
+</body>
+</html>
